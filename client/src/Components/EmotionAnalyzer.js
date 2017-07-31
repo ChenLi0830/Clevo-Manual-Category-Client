@@ -3,6 +3,7 @@ import {compose, lifecycle, withHandlers, withState} from 'recompose';
 import {Button, Icon, Table, Upload} from 'antd';
 import {graphql, withApollo} from 'react-apollo';
 import {upsertOperator, getOperator} from '../graphql/operator';
+import { Menu, Dropdown } from 'antd';
 
 let options = {
   url: {
@@ -14,35 +15,53 @@ let options = {
   token: ''
 };
 
+const styles = {
+  btn: {
+    marginLeft: "auto",
+    marginRight: "auto",
+    display: "block",
+  }
+};
 
-
-const columns = [{
-  title: '说话人',
-  dataIndex: 'speaker',
-  key: 'speaker',
-  // render: text => <a href="#">{text}</a>,
-}, {
-  title: '转译文本',
-  dataIndex: 'transcript',
-  key: 'transcript',
-}, {
-  title: 'Action',
-  key: 'action',
-  render: (text, record) => (
-      <span>
+const EmotionAnalyzer = (props) => {
+  const menu = (index) => {
+    return <Menu onClick={(event) => props.onClick(event, index)}>
+      <Menu.Item key="1">1st menu item</Menu.Item>
+      <Menu.Item key="2">2nd memu item</Menu.Item>
+      <Menu.Item key="3">3d menu item</Menu.Item>
+    </Menu>
+  };
+  
+  const columns = [{
+    title: '说话人',
+    dataIndex: 'speaker',
+    key: 'speaker',
+    width: '15%',
+    // render: text => <a href="#">{text}</a>,
+  }, {
+    title: '转译内容',
+    dataIndex: 'transcript',
+    key: 'transcript',
+    width: '60%',
+  }, {
+    title: 'Action',
+    key: 'action',
+    width: '25%',
+    render: (text, record, index) => (
+        <span>
       <a href="#">Action 一 {record.name}</a>
       <span className="ant-divider" />
       <a href="#">Delete</a>
       <span className="ant-divider" />
-      <a href="#" className="ant-dropdown-link">
-        More actions <Icon type="down" />
-      </a>
+      <Dropdown overlay={menu(index)}>
+        <a href="#" className="ant-dropdown-link">
+          分类 <Icon type="down" />
+        </a>
+      </Dropdown>
     </span>
-  ),
-}];
-
-
-const EmotionAnalyzer = (props) => {
+    ),
+  }];
+  
   console.log("EmotionAnalyzer props", props);
   // console.log("EmotionAnalyzer props.summaryList", props.summaryList);
   
@@ -56,7 +75,7 @@ const EmotionAnalyzer = (props) => {
       console.log("transcript.bg", transcript.bg);
       return {
         key: transcript.bg,
-        speaker: transcript.speaker,
+        speaker: transcript.speaker === "1" ? "客服" : "顾客",
         transcript: transcript.onebest,
       }
     });
@@ -67,14 +86,18 @@ const EmotionAnalyzer = (props) => {
   
   
   return <div>
-    <Table columns={columns}
-           // rowKey={record => record.key}
-           dataSource={tableData}
-           scroll={{y: 240}}
-        // pagination={this.state.pagination}
-           loading={props.data.loading}
-        // onChange={this.handleTableChange}
-    />
+    <div style={{backgroundColor: "white", margin: "30px 0"}}>
+      <Table columns={columns}
+             // rowKey={record => record.key}
+             dataSource={tableData}
+             // scroll={{y: 240}}
+             pagination={false}
+             loading={props.data.loading}
+             footer={() => ''}
+             bordered={true}
+          // onChange={this.handleTableChange}
+      />
+    </div>
   
     {/*<Table columns={columns}*/}
            {/*rowKey={record => record.name + record.time}*/}
@@ -85,7 +108,7 @@ const EmotionAnalyzer = (props) => {
         {/*// onChange={this.handleTableChange}*/}
     {/*/>*/}
   
-    <Button onClick={props.startAnalyzeFiles}>
+    <Button onClick={props.startAnalyzeFiles} style={styles.btn}>
       Analyze
     </Button>
 
@@ -103,7 +126,10 @@ export default compose(
         }
     ),
     withHandlers({
-      // initTranscript: props =>
+      onClick: props => (event, index) => {
+        console.log("event", event);
+        console.log("index", index);
+      }
     }),
     // withState('token', 'updateToken', () => {
     //   return "123";

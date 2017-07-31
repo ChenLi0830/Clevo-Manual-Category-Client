@@ -14,7 +14,7 @@ import Particles from 'react-particles-js';
 
 const styles = {
   wrapper: {
-    backgroundColor: null,
+    background: "none",
     minHeight: "100vh",
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif',
   },
@@ -23,18 +23,21 @@ const styles = {
     fontSize: "28px",
     fontWeight: "normal",
     letterSpacing: "0.5px",
-  }
+  },
+  particles:{
+    backgroundColor:"#fff",
+    top: 0,
+    bottom: 0,
+    position: "fixed",
+    zIndex: -1,
+  },
 };
 
 const App = (props) => {
   console.log('App props', props);
   return (
       <Layout style={styles.wrapper}>
-        <Header style={{ position: 'fixed', width: '100%' }}>
-          <span style={styles.logo}>Clevo</span>
-        </Header>
-  
-        <Particles style={{backgroundColor:"#fff"}} width="100vw" height="90vh" params={{
+        <Particles style={styles.particles} width="100vw" height="90vh" params={{
           "particles": {
             "number": {
               "value": 40,
@@ -145,14 +148,14 @@ const App = (props) => {
           "retina_detect": true
         }}/>
         
+        <Header style={{/*{ position: 'fixed', width: '100%' }*/}}>
+          <span style={styles.logo}>Clevo</span>
+        </Header>
+  
         <Content
             style = {{
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-              padding: "64px",
-              position: "fixed",
+              marginLeft: "5%",
+              width: "90%",
             }}
         >
           <Breadcrumb style={{ margin: '12px 0' }}>
@@ -160,7 +163,7 @@ const App = (props) => {
             <Breadcrumb.Item>App</Breadcrumb.Item>
           </Breadcrumb>
   
-          <div style={{ padding: 24, minHeight: "70vh" }}>
+          <div style={{ padding: 24, minHeight: "70vh"}}>
             <h1 id="analytics">
               <span>电话文本分类处理</span>
               <a href="#analytics" className="anchor">#</a>
@@ -168,15 +171,6 @@ const App = (props) => {
   
             <EmotionAnalyzer/>
             
-            {/*<Tabs defaultActiveKey="1" onChange={(key)=>{console.log(key)}}>*/}
-              {/*<TabPane tab="What you say" key="1">*/}
-                {/*<Categorizer/>*/}
-              {/*</TabPane>*/}
-              {/*<TabPane tab="How you say it" key="2">*/}
-                {/*<EmotionAnalyzer/>*/}
-              {/*</TabPane>*/}
-            {/*</Tabs>*/}
-
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
