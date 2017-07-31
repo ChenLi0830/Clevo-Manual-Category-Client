@@ -2,7 +2,8 @@ import React from 'react';
 import { Layout, Menu, Breadcrumb } from 'antd';
 const { Header, Content, Footer } = Layout;
 import {withState, compose, withHandlers, lifecycle} from 'recompose';
-
+import {graphql, withApollo} from 'react-apollo';
+import {upsertOperator, getOperator} from '../graphql/operator';
 
 import { Tabs } from 'antd';
 const TabPane = Tabs.TabPane;
@@ -26,6 +27,7 @@ const styles = {
 };
 
 const App = (props) => {
+  console.log('App props', props);
   return (
       <Layout style={styles.wrapper}>
         <Header style={{ position: 'fixed', width: '100%' }}>
@@ -160,18 +162,20 @@ const App = (props) => {
   
           <div style={{ padding: 24, minHeight: "70vh" }}>
             <h1 id="analytics">
-              <span>Real time voice analytics demo </span>
+              <span>电话文本分类处理</span>
               <a href="#analytics" className="anchor">#</a>
             </h1>
   
-            <Tabs defaultActiveKey="1" onChange={(key)=>{console.log(key)}}>
-              <TabPane tab="What you say" key="1">
-                <Categorizer/>
-              </TabPane>
-              <TabPane tab="How you say it" key="2">
-                <EmotionAnalyzer/>
-              </TabPane>
-            </Tabs>
+            <EmotionAnalyzer/>
+            
+            {/*<Tabs defaultActiveKey="1" onChange={(key)=>{console.log(key)}}>*/}
+              {/*<TabPane tab="What you say" key="1">*/}
+                {/*<Categorizer/>*/}
+              {/*</TabPane>*/}
+              {/*<TabPane tab="How you say it" key="2">*/}
+                {/*<EmotionAnalyzer/>*/}
+              {/*</TabPane>*/}
+            {/*</Tabs>*/}
 
           </div>
         </Content>
@@ -184,6 +188,15 @@ const App = (props) => {
 
 // Container
 export default compose(
+    // graphql(
+    //     getOperator,
+    //     {
+    //       options: (props) => ({
+    //         variables: {cellphone: "16044013925"},
+    //         // variables: {id: props.userId},
+    //       })
+    //     }
+    // ),
     // withState("text", "updateText", "start"),
     
 
