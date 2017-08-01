@@ -4,11 +4,13 @@ const { Header, Content, Footer } = Layout;
 import {withState, compose, withHandlers, lifecycle} from 'recompose';
 import {graphql, withApollo} from 'react-apollo';
 import {upsertOperator, getOperator} from '../graphql/operator';
+import {connect} from 'react-redux';
+import {appActions} from '../modules';
+import CellphoneModal from './CellphoneModal';
 
 import { Tabs } from 'antd';
 const TabPane = Tabs.TabPane;
 
-import Categorizer from './Categorizer';
 import EmotionAnalyzer from './EmotionAnalyzer';
 import Particles from 'react-particles-js';
 
@@ -30,6 +32,8 @@ const styles = {
     bottom: 0,
     position: "fixed",
     zIndex: -1,
+    width:"100vw",
+    height:"100vh",
   },
 };
 
@@ -37,7 +41,7 @@ const App = (props) => {
   console.log('App props', props);
   return (
       <Layout style={styles.wrapper}>
-        <Particles style={styles.particles} width="100vw" height="90vh" params={{
+        <Particles style={styles.particles} params={{
           "particles": {
             "number": {
               "value": 40,
@@ -169,11 +173,12 @@ const App = (props) => {
               <a href="#analytics" className="anchor">#</a>
             </h1>
   
+            <CellphoneModal visible={props.showModal} onSubmit={props.onSubmitCell}/>
             <EmotionAnalyzer/>
             
           </div>
         </Content>
-        <Footer style={{ textAlign: 'center' }}>
+        <Footer style={{ textAlign: 'center', backgroundColor: "#f3f3f3" }}>
           ©2017 Created by Clevo Team
         </Footer>
       </Layout>
@@ -182,6 +187,41 @@ const App = (props) => {
 
 // Container
 export default compose(
+    connect(
+        (state) => ({
+          showModal: state.app.showModal,
+        }),
+        {
+          toggleModal: appActions.toggleModal,
+          loginOperator: appActions.loginOperator,
+        }
+    ),
+    graphql(upsertOperator),
+    withHandlers({
+      onSubmitCell: props => async (cellphone) => {
+        console.log("cellphone", cellphone);
+        await props.mutate({
+          variables: {
+            cellphone,
+          }
+        });
+        
+        props.toggleModal();
+        props.loginOperator(cellphone);
+        localStorage.setItem('operator', cellphone);
+      },
+    }),
+    lifecycle({
+      componentDidMount(){
+        //Check if user is logged in
+        let operator = localStorage.getItem('operator');
+        if (operator) {
+          this.props.loginOperator(operator);
+        } else {
+          this.props.toggleModal();
+        }
+      }
+    }),
     // graphql(
     //     getOperator,
     //     {

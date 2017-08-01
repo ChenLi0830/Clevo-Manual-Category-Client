@@ -5,15 +5,12 @@ import {combineReducers} from 'redux';
 // import userReducer from './user';
 // import createPinReducer from './createPin';
 // import feedbackReducer from './feedbackModal';
+import appReducer from './app';
+
 import {client} from './apollo';
 
 export default combineReducers({
   apollo: client.reducer(),
-  // promoCode: promoCodeReducer,
-  // inputPin: inputPinReducer,
-  // app: appReducer,
-  // user: userReducer,
-  // createPIN: createPinReducer,
-  // feedback: feedbackReducer,
+  app: appReducer,
 });
 
