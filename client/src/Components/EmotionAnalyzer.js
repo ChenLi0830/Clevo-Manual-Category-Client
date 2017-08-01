@@ -1,6 +1,6 @@
 import React from 'react';
 import {compose, lifecycle, withHandlers, withState} from 'recompose';
-import {Button, Icon, Table, Upload} from 'antd';
+import {Button, Icon, Table, Upload, Badge, Tag} from 'antd';
 import {graphql, withApollo} from 'react-apollo';
 import {upsertOperator, getOperator} from '../graphql/operator';
 import {submitSpeech} from '../graphql/speech';
@@ -45,6 +45,7 @@ const keyToCategory = {
 
 const EmotionAnalyzer = (props) => {
   let tableData = [];
+  let title = ()=><span>尚未获取文本</span>;
   
   console.log("EmotionAnalyzer props", props);
   // console.log("EmotionAnalyzer props.summaryList", props.summaryList);
@@ -52,6 +53,7 @@ const EmotionAnalyzer = (props) => {
   // get table data source
   if (props.operatorCell && !props.data.loading) {
     const {transcriptionText, fileName, transcribedAt, categorizedCount} = props.data.operator.rawSpeech;
+    const {speechCount, sentenceCount, categorizedFileNames} = props.data.operator;
   
     const transcriptList = JSON.parse(transcriptionText);
   
@@ -73,6 +75,13 @@ const EmotionAnalyzer = (props) => {
         operatorId: props.operatorCell,
       }
     });
+  
+    
+    
+    title = ()=><div>
+      <Tag color="green">分类对话总计：{~~speechCount}篇</Tag>
+      <Tag color="blue">分类句子总计：{~~sentenceCount}句</Tag>
+    </div>;
   }
   
   // get table column
@@ -137,25 +146,16 @@ const EmotionAnalyzer = (props) => {
              // rowKey={record => record.key}
              dataSource={tableData}
              // scroll={{y: 240}}
+             title={title}
              pagination={false}
              loading={props.data.loading}
              footer={() => ''}
              bordered={true}
-          // onChange={this.handleTableChange}
       />
     </div>
   
-    {/*<Table columns={columns}*/}
-           {/*rowKey={record => record.name + record.time}*/}
-           {/*dataSource={props.summaryList}*/}
-           {/*scroll={{y: 240}}*/}
-        {/*// pagination={this.state.pagination}*/}
-        {/*//    loading={props.fileList.length > 0 && props.data.length === 0}*/}
-        {/*// onChange={this.handleTableChange}*/}
-    {/*/>*/}
-  
     <Button onClick={() => props.onSubmit(tableData)} style={styles.btn} type="primary">
-      Submit
+      提交分类结果
     </Button>
 
   </div>
@@ -190,8 +190,8 @@ export default compose(
       onSubmit: props => async (tableData) => {
         console.log("tableData", tableData);
         console.log("props.categorizeResult", props.categorizeResult);
-        if (Object.keys(props.categorizeResult).length === 0) {
-          return alert("分类未完成");
+        if (Object.keys(props.categorizeResult).length < tableData.length) {
+          return alert("请完成每句话的分类再提交");
         }
         const {transcriptionText, fileName, transcribedAt, categorizedCount} = props.data.operator.rawSpeech;
   

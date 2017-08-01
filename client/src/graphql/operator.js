@@ -6,6 +6,8 @@ query($cellphone: String){
   	id
     cellphone
     categorizedFileNames,
+    speechCount,
+    sentenceCount,
     rawSpeech{
       fileName,
       transcribedAt,
@@ -22,6 +24,8 @@ mutation($cellphone: ID){
     id,
     cellphone,
     categorizedFileNames,
+    speechCount,
+    sentenceCount,
     rawSpeech{
       fileName,
       transcribedAt,

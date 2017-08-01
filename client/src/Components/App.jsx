@@ -35,6 +35,11 @@ const styles = {
     width:"100vw",
     height:"100vh",
   },
+  logout:{
+    right: "10%",
+    position: "absolute",
+    color: "white",
+  },
 };
 
 const App = (props) => {
@@ -154,6 +159,12 @@ const App = (props) => {
         
         <Header style={{/*{ position: 'fixed', width: '100%' }*/}}>
           <span style={styles.logo}>Clevo</span>
+  
+          {
+            props.operatorCell
+                &&
+            <a style={styles.logout} onClick={props.onLogout}>登出</a>
+          }
         </Header>
   
         <Content
@@ -190,10 +201,12 @@ export default compose(
     connect(
         (state) => ({
           showModal: state.app.showModal,
+          operatorCell: state.app.operator,
         }),
         {
           toggleModal: appActions.toggleModal,
           loginOperator: appActions.loginOperator,
+          logout: appActions.resetState,
         }
     ),
     graphql(upsertOperator),
@@ -206,32 +219,34 @@ export default compose(
           }
         });
         
-        props.toggleModal();
+        props.toggleModal(false);
         props.loginOperator(cellphone);
         localStorage.setItem('operator', cellphone);
+      },
+    }),
+    withHandlers({
+      loginOperator: props => () => {
+        let operator = localStorage.getItem('operator');
+        if (operator) {
+          props.onSubmitCell(operator);
+        } else {
+          props.toggleModal(true);
+        }
+      }
+    }),
+    withHandlers({
+      onLogout: props => () => {
+        localStorage.clear();
+        props.logout();
+        props.loginOperator();
       },
     }),
     lifecycle({
       componentDidMount(){
         //Check if user is logged in
-        let operator = localStorage.getItem('operator');
-        if (operator) {
-          this.props.loginOperator(operator);
-        } else {
-          this.props.toggleModal();
-        }
+        this.props.loginOperator();
       }
     }),
-    // graphql(
-    //     getOperator,
-    //     {
-    //       options: (props) => ({
-    //         variables: {cellphone: "16044013925"},
-    //         // variables: {id: props.userId},
-    //       })
-    //     }
-    // ),
-    // withState("text", "updateText", "start"),
-    
+
 
 )(App);
