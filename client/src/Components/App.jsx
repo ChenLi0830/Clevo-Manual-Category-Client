@@ -163,7 +163,7 @@ const App = (props) => {
           {
             props.operatorCell
                 &&
-            <a style={styles.logout} onClick={props.onLogout}>登出</a>
+            <a style={styles.logout} onClick={props.onLogout}>登出({props.operatorCell})</a>
           }
         </Header>
   
