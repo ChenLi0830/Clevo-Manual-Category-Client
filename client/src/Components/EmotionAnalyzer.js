@@ -262,6 +262,7 @@ export default compose(
             fileName: fileName,
             operatorId: props.operatorCell,
             needReverseSpeaker: false, // todo change this
+            businessType: props.businessType,
             sentenceList: tableData.map(record => ({
               "categoryName": record.categoryName,
               "fileNameBeginTime": record.fileNameBeginTime,

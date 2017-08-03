@@ -49,7 +49,7 @@ const App = (props) => {
         <Particles style={styles.particles} params={{
           "particles": {
             "number": {
-              "value": 40,
+              "value": 20,
               "density": {
                 "enable": true,
                 "value_area": 800
@@ -84,7 +84,7 @@ const App = (props) => {
               }
             },
             "size": {
-              "value": 3,
+              "value": 4,
               "random": true,
               "anim": {
                 "enable": false,
@@ -95,14 +95,14 @@ const App = (props) => {
             },
             "line_linked": {
               "enable": true,
-              "distance": 70,
+              "distance": 100,
               "color": "#1c385f",
               "opacity": 0.4,
               "width": 1
             },
             "move": {
               "enable": true,
-              "speed": 3,
+              "speed": 2,
               "direction": "none",
               "random": false,
               "straight": false,
