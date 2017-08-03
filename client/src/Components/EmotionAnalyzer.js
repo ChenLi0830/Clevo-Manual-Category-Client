@@ -1,19 +1,10 @@
 import React from 'react';
 import {compose, lifecycle, withHandlers, withState} from 'recompose';
-import {Button, Dropdown, Icon, Menu, Table, Tag, Form, message, Cascader} from 'antd';
+import {Button, Cascader, Dropdown, Icon, Menu, message, Table, Tag} from 'antd';
 import {graphql} from 'react-apollo';
 import {getOperator} from '../graphql/operator';
 import {submitSpeech} from '../graphql/speech';
 import {connect} from 'react-redux';
-const SubMenu = Menu.SubMenu;
-const FormItem = Form.Item;
-
-import { Input } from 'antd';
-
-
-import { Select } from 'antd';
-const Option = Select.Option;
-
 
 const styles = {
   btn: {
@@ -21,7 +12,7 @@ const styles = {
     marginRight: "auto",
     display: "block",
   },
-  businessDropdown:{
+  businessDropdown: {
     width: 240,
     display: "block",
     marginLeft: "auto",
@@ -37,6 +28,7 @@ const keyToCategory = {
   "answer-question": "解答用户问题",
   "please-wait": "等待提示",
   "thanks-4-wait": "等待感谢/致歉",
+  "end": "结束语",
   "service-others": "其他",
   
   "charge": "查询扣款",
@@ -88,10 +80,6 @@ const options = [{
     }
   ],
 }];
-
-function onChange(value) {
-  console.log(value);
-}
 
 const EmotionAnalyzer = (props) => {
   console.log("EmotionAnalyzer props", props);
@@ -203,7 +191,9 @@ const EmotionAnalyzer = (props) => {
              title={title}
              pagination={false}
              loading={props.data.loading}
-             footer={() => <Cascader style = {styles.businessDropdown} options={options} onChange={props.onBusiDropdownChange} placeholder="请选择：该次电话业务类别" />}
+             footer={() => <Cascader style={styles.businessDropdown} options={options}
+                                     onChange={props.onBusiDropdownChange}
+                                     placeholder="请选择：该次电话业务类别"/>}
              bordered={true}
       />
     </div>
@@ -247,7 +237,7 @@ export default compose(
       onSubmit: props => async (tableData) => {
         console.log("tableData", tableData);
         console.log("props.categorizeResult", props.categorizeResult);
-        if (props.businessType.length === 0){
+        if (props.businessType.length === 0) {
           return message.error('请选择业务类型');
         } else if (Object.keys(props.categorizeResult).length < tableData.length) {
           return message.error('请完成每句话的分类再提交');
@@ -278,7 +268,7 @@ export default compose(
         });
         
       },
-  
+      
       onBusiDropdownChange: props => (value) => {
         props.updateBusinessType(value);
       }
