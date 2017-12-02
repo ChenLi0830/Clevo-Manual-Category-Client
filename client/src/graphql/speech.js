@@ -20,29 +20,4 @@ query getCallBySkip($skip: Int){
 }
 `
 
-const callUpdateRikyRatings = gql`
-mutation callUpdateRikyRatings($callId: MongoID!, $riskyRatings: [CallCallRiskyRatingsInput]){
-  callUpdate(record: {
-    _id: $callId
-    riskyRatings: $riskyRatings
-    # validators
-  }) {
-    recordId
-    record{
-      riskyRatings {
-        # validator
-        rating
-        # _id
-      }
-      validators {
-        name
-        status
-        createdAt
-        updatedAt
-      }
-    }
-  }
-}
-`
-
-export { getCallBySkip, callUpdateRikyRatings }
+export { getCallBySkip }

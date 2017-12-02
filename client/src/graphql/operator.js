@@ -35,7 +35,7 @@ mutation validatorCreate($validatorName: String){
 }
 `
 
-const validatorUpdateValidatedCalls = gql`
+const validatorValidateCall = gql`
 mutation validatorValidateCall ($validatorId: ID!, $callId: ID!,  $rating: Int!){
   validatorValidateCall(
     validatorId:$validatorId
@@ -52,4 +52,4 @@ mutation validatorValidateCall ($validatorId: ID!, $callId: ID!,  $rating: Int!)
 }
 `
 
-export { validatorByName, validatorCreate, validatorUpdateValidatedCalls }
+export { validatorByName, validatorCreate, validatorValidateCall }

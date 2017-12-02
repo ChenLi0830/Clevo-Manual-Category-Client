@@ -2,8 +2,8 @@ import React from 'react'
 import {compose, lifecycle, withHandlers, withState, branch, renderComponent} from 'recompose'
 import {Button, Cascader, Dropdown, Icon, Menu, message, Table, Tag, Radio} from 'antd'
 import {graphql, withApollo} from 'react-apollo'
-import {validatorByName, validatorUpdateValidatedCalls} from '../graphql/operator'
-import {callUpdateRikyRatings, getCallBySkip} from '../graphql/speech'
+import {validatorByName, validatorValidateCall} from '../graphql/operator'
+import {getCallBySkip} from '../graphql/speech'
 import {connect} from 'react-redux'
 
 const RadioGroup = Radio.Group
@@ -255,8 +255,7 @@ export default compose(
     // withState('categorizeResult', 'updateCateResult', {}),
     withState('riskyValue', 'updateRiskyValue', null),
     withApollo,
-    graphql(validatorUpdateValidatedCalls, { name: 'validatorUpdateMutation' }), // define mutation
-    graphql(callUpdateRikyRatings, { name: 'callUpdateMutation' }), // define mutation
+    graphql(validatorValidateCall, { name: 'validateCallMutation' }), // define mutation
     withHandlers({
       onChangeRiskyValue: props => (e) => {
         console.log('radio checked', e.target.value)
@@ -270,43 +269,14 @@ export default compose(
         }
 
         try {
-          // to be solved - call update 不是atomic的，当一个人load call，然后submit的时候，别人也同时submit，会出错
-          let call = await props.client.query({
-            query: getCallBySkip,
-            variables: { skip: props.validator.validatorByName.validatedCalls.length }
-          })
-
-          let callId = call.data.calls[0]._id
-          let riskyRatings = call.data.calls[0].riskyRatings
+          let callId = props.call.calls[0]._id
           let validatorId = props.validator.validatorByName._id
-          let validatedCallIds = props.validator.validatorByName.validatedCalls.map(call => call._id)
 
-          console.log('call', call)
-          console.log('riskyRatings', riskyRatings)
-          let cleanRiskyRatings = riskyRatings.map(rating => {
-            return {
-              validator: rating.validator,
-              rating: rating.rating
-            }
-          })
-          let newRatings = [...cleanRiskyRatings, {
-            validator: props.validator.validatorByName._id,
-            rating: props.riskyValue
-          }]
-          console.log('newRatings', newRatings)
-          let newValidatedCallIds = [...validatedCallIds, callId]
-          console.log('newValidatedCallIds', newValidatedCallIds)
-
-          await props.callUpdateMutation({
-            variables: {
-              callId: callId,
-              riskyRatings: newRatings
-            }
-          })
-          await props.validatorUpdateMutation({
+          await props.validateCallMutation({
             variables: {
               validatorId: validatorId,
-              validatedCalls: newValidatedCallIds
+              callId: callId,
+              rating: props.riskyValue
             },
             refetchQueries: [
               { query: getCallBySkip, variables: {skip: props.validator.validatorByName.validatedCalls.length + 1} },
