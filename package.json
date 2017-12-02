@@ -43,9 +43,9 @@
   "scripts": {
     "dev": "webpack -d --watch",
     "build": "webpack -p",
-    "host": "http-server ./client/ -p 5010",
+    "host": "http-server ./client/ -p 3000",
     "deploy-prod": "sls deploy --stage production",
-    "client": "webpack && http-server ./client/ -p 5010"
+    "client": "webpack && http-server ./client/ -p 3000"
   },
   "author": "Chen Li",
   "license": "ISC"

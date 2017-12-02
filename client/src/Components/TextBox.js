@@ -1,10 +1,12 @@
 import React from 'react'
-import {compose, lifecycle, withHandlers, withState} from 'recompose'
-import {Button, Cascader, Dropdown, Icon, Menu, message, Table, Tag} from 'antd'
-import {graphql} from 'react-apollo'
-import {getOperator} from '../graphql/operator'
-import {submitSpeech} from '../graphql/speech'
+import {compose, lifecycle, withHandlers, withState, branch, renderComponent} from 'recompose'
+import {Button, Cascader, Dropdown, Icon, Menu, message, Table, Tag, Radio} from 'antd'
+import {graphql, withApollo} from 'react-apollo'
+import {validatorByName, validatorUpdateValidatedCalls} from '../graphql/operator'
+import {callUpdateRikyRatings, getCallBySkip} from '../graphql/speech'
 import {connect} from 'react-redux'
+
+const RadioGroup = Radio.Group
 
 const styles = {
   btn: {
@@ -81,7 +83,7 @@ const options = [{
   ]
 }]
 
-const EmotionAnalyzer = (props) => {
+const TextBox = (props) => {
   console.log('EmotionAnalyzer props', props)
   
   let tableData = []
@@ -90,7 +92,7 @@ const EmotionAnalyzer = (props) => {
   // console.log("EmotionAnalyzer props.summaryList", props.summaryList);
   
   // get table data source
-  if (props.operatorCell && !props.data.loading) {
+  if (props.operatorCellphone && !props.data.loading) {
     const {transcriptionText, fileName, transcribedAt, categorizedCount} = props.data.operator.rawSpeech
     const {speechCount, sentenceCount, categorizedFileNames} = props.data.operator
     
@@ -115,10 +117,9 @@ const EmotionAnalyzer = (props) => {
         categoryKey: categoryKey || null,
         fileNameBeginTime: `${fileName}-${transcript.bg}`,
         fileName: fileName,
-        operatorId: props.operatorCell
+        operatorId: props.operatorCellphone
       }
     })
-    
     
     title = () => <div>
       你的战绩：
@@ -213,71 +214,163 @@ const EmotionAnalyzer = (props) => {
 export default compose(
     connect(
         (state) => ({
-          operatorCell: state.app.operator
+          operatorCellphone: state.app.operator
         })
     ),
     graphql(
-        getOperator,
+      validatorByName,
       {
+        name: 'validator',
         options: (props) => ({
-            variables: {cellphone: props.operatorCell}
-            // variables: {id: props.userId},
-          })
+          variables: {validatorName: props.operatorCellphone}
+        })
       }
     ),
-
-    graphql(submitSpeech),
-    withState('categorizeResult', 'updateCateResult', {}),
-    withState('businessType', 'updateBusinessType', []),
+    branch(
+      props => {
+        console.log('props.validator', props.validator)
+        return props.validator.loading
+      },
+      renderComponent(props => <h1>Loading</h1>)
+    ),
+    graphql(
+      getCallBySkip,
+      {
+        name: 'call',
+        options: (props) => ({
+          variables: {
+            skip: props.validator.validatorByName.validatedCalls.length
+          }
+        })
+      }
+    ),
+    branch(
+      props => {
+        console.log('props.call', props.call)
+        return props.call.loading
+      },
+      renderComponent(props => <h1>Loading</h1>)
+    ),
+    // graphql(),
+    // withState('categorizeResult', 'updateCateResult', {}),
+    withState('riskyValue', 'updateRiskyValue', null),
+    withApollo,
+    graphql(validatorUpdateValidatedCalls, { name: 'validatorUpdateMutation' }), // define mutation
+    graphql(callUpdateRikyRatings, { name: 'callUpdateMutation' }), // define mutation
     withHandlers({
-      onChooseCategory: props => (event, index) => {
-        let newResult = props.categorizeResult
-        
-        newResult[index] = {categoryName: keyToCategory[event.key], categoryKey: event.key}
-        props.updateCateResult(newResult)
+      onChangeRiskyValue: props => (e) => {
+        console.log('radio checked', e.target.value)
+        props.updateRiskyValue(e.target.value)
       },
 
-      onSubmit: props => async (tableData) => {
-        console.log('tableData', tableData)
-        console.log('props.categorizeResult', props.categorizeResult)
-        if (props.businessType.length === 0) {
-          return message.error('请选择业务类型')
-        } else if (Object.keys(props.categorizeResult).length < tableData.length) {
-          return message.error('请完成每句话的分类再提交')
+      onSubmit: props => async () => {
+        console.log('onSubmit props', props)
+        if (props.riskyValue === null) {
+          return message.error('请选择危险级别')
         }
 
-        const {transcriptionText, fileName, transcribedAt, categorizedCount} = props.data.operator.rawSpeech
-        
-        props.updateCateResult({})
-        
-        await props.mutate({
-          variables: {
-            fileName: fileName,
-            operatorId: props.operatorCell,
-            needReverseSpeaker: false, // todo change this
-            businessType: props.businessType,
-            sentenceList: tableData.map(record => ({
-              'categoryName': record.categoryName,
-              'fileNameBeginTime': record.fileNameBeginTime,
-              'operatorId': record.operatorId,
-              'fileName': record.fileName,
-              'text': record.text,
-              'bg': record.bg,
-              'ed': record.ed,
-              'speaker': record.speaker
-            }))
-          },
-          refetchQueries: [{query: getOperator, variables: {cellphone: props.operatorCell} }]
-        })
-        
-      },
+        try {
+          // to be solved - call update 不是atomic的，当一个人load call，然后submit的时候，别人也同时submit，会出错
+          let call = await props.client.query({
+            query: getCallBySkip,
+            variables: { skip: props.validator.validatorByName.validatedCalls.length }
+          })
 
-      onBusiDropdownChange: props => (value) => {
-        props.updateBusinessType(value)
-      }
-    }),
-    lifecycle({
-      componentWillMount () {
+          let callId = call.data.calls[0]._id
+          let riskyRatings = call.data.calls[0].riskyRatings
+          let validatorId = props.validator.validatorByName._id
+          let validatedCallIds = props.validator.validatorByName.validatedCalls.map(call => call._id)
+
+          console.log('call', call)
+          console.log('riskyRatings', riskyRatings)
+          let cleanRiskyRatings = riskyRatings.map(rating => {
+            return {
+              validator: rating.validator,
+              rating: rating.rating
+            }
+          })
+          let newRatings = [...cleanRiskyRatings, {
+            validator: props.validator.validatorByName._id,
+            rating: props.riskyValue
+          }]
+          console.log('newRatings', newRatings)
+          let newValidatedCallIds = [...validatedCallIds, callId]
+          console.log('newValidatedCallIds', newValidatedCallIds)
+
+          await props.callUpdateMutation({
+            variables: {
+              callId: callId,
+              riskyRatings: newRatings
+            }
+          })
+          await props.validatorUpdateMutation({
+            variables: {
+              validatorId: validatorId,
+              validatedCalls: newValidatedCallIds
+            },
+            refetchQueries: [
+              { query: getCallBySkip, variables: {skip: props.validator.validatorByName.validatedCalls.length + 1} },
+              { query: validatorByName, variables: {validatorName: props.operatorCellphone} }
+            ]
+          })
+
+          props.updateRiskyValue(null)
+        } catch (error) {
+          console.error(error)
+        }
+        // // validatorUpdateMutation
+        // // callUpdateMutation
+        // const {transcriptionText, fileName, transcribedAt, categorizedCount} = props.data.operator.rawSpeech
+
+        // props.updateCateResult({})
+
+        // await props.mutate({
+        //   variables: {
+        //     fileName: fileName,
+        //     operatorId: props.operatorCellphone,
+        //     needReverseSpeaker: false, // todo change this
+        //     businessType: props.businessType,
+        //     sentenceList: tableData.map(record => ({
+        //       'categoryName': record.categoryName,
+        //       'fileNameBeginTime': record.fileNameBeginTime,
+        //       'operatorId': record.operatorId,
+        //       'fileName': record.fileName,
+        //       'text': record.text,
+        //       'bg': record.bg,
+        //       'ed': record.ed,
+        //       'speaker': record.speaker
+        //     }))
+        //   },
+        //   refetchQueries: [{query: getOperator, variables: {cellphone: props.operatorCellphone} }]
+        // })
       }
     })
-)(EmotionAnalyzer)
+  )(props => {
+    console.log('TextBox props', props)
+
+    let call = props.call.calls[0]
+    let transcript = call.breakdowns.map(sentence => sentence.transcript).join('|')
+    console.log('transcript', transcript)
+
+    // return <RadioGroup name='radiogroup'>
+    //   <Radio value={0}>正常</Radio>
+    //   <Radio value={1}>比较正常</Radio>
+    //   <Radio value={2}>不确定</Radio>
+    //   <Radio value={3}>有违法倾向</Radio>
+    //   <Radio value={4}>违法</Radio>
+    // </RadioGroup>
+    return <div>
+      <h1>{transcript}</h1>
+      <RadioGroup name='radiogroup' onChange={props.onChangeRiskyValue} value={props.riskyValue}>
+        <Radio value={0}>正常</Radio>
+        <Radio value={1}>比较正常</Radio>
+        <Radio value={2}>可能违法</Radio>
+        <Radio value={3}>违法</Radio>
+      </RadioGroup>
+
+      <Button onClick={props.onSubmit}>
+        提交
+      </Button>
+    </div>
+  })
+// )(TextBox)

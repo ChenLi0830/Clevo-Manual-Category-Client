@@ -10,7 +10,7 @@ const CellphoneModal = (props) => {
       登录
     </Button>
   </div>
-  
+
   return <Modal
     title='快速登录'
     visible={props.visible}

@@ -1,39 +1,55 @@
 import { gql } from 'react-apollo'
 
-const getOperator = gql`
-query($cellphone: String){
-  operator(cellphone:$cellphone){
-    id
-    cellphone
-    categorizedFileNames,
-    speechCount,
-    sentenceCount,
-    rawSpeech{
-      fileName,
-      transcribedAt,
-      transcriptionText,
-      categorizedCount
+const validatorByName = gql`
+query validatorByName($validatorName: String!){
+  validatorByName(name: $validatorName) {
+    _id
+    name
+    status
+    validatedCalls {
+      _id
+      status
+      format
+      encoding
+      source
+      startedAt
+      subject
+      createdAt
+      updatedAt
     }
   }
 }
 `
 
-const upsertOperator = gql`
-mutation($cellphone: ID){
-  operatorUpsert(cellphone: $cellphone){
-    id,
-    cellphone,
-    categorizedFileNames,
-    speechCount,
-    sentenceCount,
-    rawSpeech{
-      fileName,
-      transcribedAt,
-      transcriptionText,
-      categorizedCount
+const validatorCreate = gql`
+mutation validatorCreate($validatorName: String){
+  validatorCreate(record: {
+    name: $validatorName
+  }) {
+    recordId
+    record{
+      name
+      status
     }
   }
 }
 `
 
-export { getOperator, upsertOperator }
+const validatorUpdateValidatedCalls = gql`
+mutation validatorValidateCall ($validatorId: ID!, $callId: ID!,  $rating: Int!){
+  validatorValidateCall(
+    validatorId:$validatorId
+    callId: $callId
+    rating: $rating
+  ) {
+    name
+    validatedCalls {
+      source
+      _id
+    }
+    _id
+  }
+}
+`
+
+export { validatorByName, validatorCreate, validatorUpdateValidatedCalls }

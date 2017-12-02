@@ -1,7 +1,7 @@
 // Action types
-const TOGGLE_LOGIN_MODAL = 'TOGGLE_LOGIN_MODAL';
-const LOGIN_OPERATOR = 'LOGIN_OPERATOR';
-const RESET_STATE = 'RESET_STATE';
+const TOGGLE_LOGIN_MODAL = 'TOGGLE_LOGIN_MODAL'
+const LOGIN_OPERATOR = 'LOGIN_OPERATOR'
+const RESET_STATE = 'RESET_STATE'
 
 // Action creator
 export const toggleModal = (visible) => ({
