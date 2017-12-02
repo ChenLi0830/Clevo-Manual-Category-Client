@@ -1,4 +1,4 @@
-import {gql} from 'react-apollo';
+import { gql } from 'react-apollo'
 
 const submitSpeech = gql`
 mutation($fileName: String, $operatorId: String, $needReverseSpeaker: Boolean, $sentenceList: [SentenceInput], $businessType:[String]){
@@ -21,8 +21,6 @@ mutation($fileName: String, $operatorId: String, $needReverseSpeaker: Boolean, $
     }
   }
 }
-`;
+`
 
-export {
-  submitSpeech
-}
+export { submitSpeech }

@@ -1,7 +1,7 @@
 // import config from '../../exp.json';
-import ApolloClient, {createNetworkInterface} from 'apollo-client';
+import ApolloClient, {createNetworkInterface} from 'apollo-client'
 
-let uri = "https://el9pqobs08.execute-api.us-west-2.amazonaws.com/dev/graphql";
+let uri = 'https://el9pqobs08.execute-api.us-west-2.amazonaws.com/dev/graphql';
 // switch (config.slug){
 //   case "nomii-rewards-exponentjs-dev":
 //     uri = "http://192.168.0.14:4000/graphql"; //The LAN IP address where GraphQL is hosted
@@ -17,25 +17,25 @@ let uri = "https://el9pqobs08.execute-api.us-west-2.amazonaws.com/dev/graphql";
 const networkInterface = createNetworkInterface({
   uri: uri,
   opts: {
-    //The "same-origin" value makes query behave similarly to
+    // The "same-origin" value makes query behave similarly to
     // XMLHttpRequest with regards to cookies. Otherwise, cookies won't get sent, resulting in these
     // requests not preserving the authentication session.
-    credentials: "same-origin",
+    credentials: 'same-origin'
   }
-});
+})
 
 const client = new ApolloClient({
   networkInterface: networkInterface,
   dataIdFromObject: o => {
     // console.log("object", o);
-    if (o.id){
-      return `${o.__typename}-${o.id}`;
+    if (o.id) {
+      return `${o.__typename}-${o.id}`
     } else if (o.restaurantId) {
-      return `${o.__typename}-${o.restaurantId}`;
+      return `${o.__typename}-${o.restaurantId}`
     } else {
-      return undefined;
+      return undefined
     }
-  },
-});
+  }
+})
 
-export {client};
+export {client}

@@ -1,9 +1,9 @@
-import {gql}from 'react-apollo';
+import { gql } from 'react-apollo'
 
 const getOperator = gql`
 query($cellphone: String){
   operator(cellphone:$cellphone){
-  	id
+    id
     cellphone
     categorizedFileNames,
     speechCount,
@@ -14,9 +14,9 @@ query($cellphone: String){
       transcriptionText,
       categorizedCount
     }
-	}
+  }
 }
-`;
+`
 
 const upsertOperator = gql`
 mutation($cellphone: ID){
@@ -34,9 +34,6 @@ mutation($cellphone: ID){
     }
   }
 }
-`;
+`
 
-export {
-  getOperator,
-  upsertOperator,
-}
+export { getOperator, upsertOperator }

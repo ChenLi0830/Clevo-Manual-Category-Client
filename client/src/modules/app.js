@@ -1,44 +1,40 @@
 // Action types
-const TOGGLE_LOGIN_MODAL = "TOGGLE_LOGIN_MODAL";
-const LOGIN_OPERATOR = "LOGIN_OPERATOR";
-const RESET_STATE = "RESET_STATE";
+const TOGGLE_LOGIN_MODAL = 'TOGGLE_LOGIN_MODAL';
+const LOGIN_OPERATOR = 'LOGIN_OPERATOR';
+const RESET_STATE = 'RESET_STATE';
 
 // Action creator
 export const toggleModal = (visible) => ({
   type: TOGGLE_LOGIN_MODAL,
-  payload: visible,
-});
+  payload: visible
+})
 
-export const loginOperator = (cellphone)=>({
+export const loginOperator = (cellphone) => ({
   type: LOGIN_OPERATOR,
-  payload: cellphone,
-});
+  payload: cellphone
+})
 
 export const resetState = () => ({
-  type: RESET_STATE,
-});
+  type: RESET_STATE
+})
 
 // Reducer
 const initialState = {
   showModal: false,
-  operator: null,
-};
+  operator: null
+}
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case "TOGGLE_LOGIN_MODAL":
-      return {...state, showModal: action.payload};
-    case "LOGIN_OPERATOR":
-      return {...state, operator: action.payload};
-    case "RESET_STATE":
-      return initialState;
+    case 'TOGGLE_LOGIN_MODAL':
+      return {...state, showModal: action.payload}
+    case 'LOGIN_OPERATOR':
+      return {...state, operator: action.payload}
+    case 'RESET_STATE':
+      return initialState
     default:
-      return state;
+      return state
   }
-};
+}
 
-export default reducer;
-
-
-
-
+export default reducer
