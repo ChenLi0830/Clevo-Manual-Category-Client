@@ -134,7 +134,7 @@ export default compose(
       onLogout: props => () => {
         localStorage.clear()
         props.logout()
-        props.loginOperator()
+        props.loginOperatorLocalStorage()
       }
     }),
     lifecycle({

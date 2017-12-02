@@ -20,6 +20,8 @@ const client = new ApolloClient({
     // console.log("object", o)
     if (o.id) {
       return `${o.__typename}-${o.id}`
+    } else if (o._id) {
+      return `${o.__typename}-${o._id}`
     } else if (o.restaurantId) {
       return `${o.__typename}-${o.restaurantId}`
     } else {

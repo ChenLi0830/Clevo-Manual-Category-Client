@@ -221,8 +221,11 @@ export default compose(
       validatorByName,
       {
         name: 'validator',
-        options: (props) => ({
-          variables: {validatorName: props.operatorCellphone}
+        options: props => ({
+          variables: {
+            validatorName: props.operatorCellphone
+          },
+          fetchPolicy: 'network-only'
         })
       }
     ),
@@ -322,20 +325,14 @@ export default compose(
     let transcript = call.breakdowns.map(sentence => sentence.transcript).join('|')
     console.log('transcript', transcript)
 
-    // return <RadioGroup name='radiogroup'>
-    //   <Radio value={0}>正常</Radio>
-    //   <Radio value={1}>比较正常</Radio>
-    //   <Radio value={2}>不确定</Radio>
-    //   <Radio value={3}>有违法倾向</Radio>
-    //   <Radio value={4}>违法</Radio>
-    // </RadioGroup>
     return <div>
       <h1>{transcript}</h1>
       <RadioGroup name='radiogroup' onChange={props.onChangeRiskyValue} value={props.riskyValue}>
         <Radio value={0}>正常</Radio>
         <Radio value={1}>比较正常</Radio>
-        <Radio value={2}>可能违法</Radio>
-        <Radio value={3}>违法</Radio>
+        <Radio value={2}>难以读懂</Radio>
+        <Radio value={3}>可能违法</Radio>
+        <Radio value={4}>违法</Radio>
       </RadioGroup>
 
       <Button onClick={props.onSubmit}>

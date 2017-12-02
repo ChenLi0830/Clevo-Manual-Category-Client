@@ -28,6 +28,7 @@ mutation validatorCreate($validatorName: String){
   }) {
     recordId
     record{
+      _id
       name
       status
     }
@@ -42,6 +43,7 @@ mutation validatorValidateCall ($validatorId: ID!, $callId: ID!,  $rating: Int!)
     callId: $callId
     rating: $rating
   ) {
+    _id
     name
     validatedCalls {
       source
